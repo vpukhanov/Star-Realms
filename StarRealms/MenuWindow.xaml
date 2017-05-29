@@ -1,0 +1,32 @@
+﻿<Window x:Class="StarRealms.MenuWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:StarRealms"
+        mc:Ignorable="d"
+        Title="Звездные Империи" Height="850" Width="1400" ResizeMode="CanMinimize"
+        WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Grid.Background>
+            <ImageBrush ImageSource="/Resources/StarRealms-Background.jpg" Stretch="UniformToFill"></ImageBrush>
+        </Grid.Background>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition Width="2*" />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+
+        <Image Grid.Column="1" VerticalAlignment="Bottom" HorizontalAlignment="Center" Height="300"
+            Source="/Resources/StarRealms-Logo.png" />
+        <StackPanel Grid.Column="1" Grid.Row="1" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,20,0,0">
+            <Button Content="Начать игру" Margin="10" FontSize="18" Padding="15" Width="269" Background="#9922DE3B" Foreground="White" Click="NewGame_Click" />
+            <Button Content="Загрузить игру" Margin="10" FontSize="18" Padding="15" Width="269" Background="#9922DE3B" Foreground="White" Click="LoadGame_Click" />
+            <Button Content="Выход" Margin="10" FontSize="18" Padding="15" Width="269" Background="#9922DE3B" Foreground="White" Click="Exit_Click" />
+        </StackPanel>
+    </Grid>
+</Window>

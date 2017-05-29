@@ -1,0 +1,212 @@
+﻿<Window x:Class="StarRealms_Client.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:StarRealms_Client"
+        xmlns:mocks="clr-namespace:StarRealms.Mocks"
+        xmlns:engine="clr-namespace:StarRealms.RulesEngine;assembly=StarRealms.RulesEngine"
+        mc:Ignorable="d"
+        Title="Звездные Империи" Height="850" Width="1400" ResizeMode="CanMinimize"
+        WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <engine:Game x:Key="CurrentGame" />
+        <mocks:GameMockData x:Key="MockGame" />
+
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibility" />
+
+        <Image x:Key="IconSave" Source="/Resources/StarRealms-SaveIcon.png" />
+    </Window.Resources>
+
+    <Grid>
+        <Grid.Background>
+            <ImageBrush ImageSource="/Resources/StarRealms-Background.jpg" Stretch="UniformToFill"></ImageBrush>
+        </Grid.Background>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="1.5*" />
+            <RowDefinition Height="30" />
+            <RowDefinition />
+            <RowDefinition Height="60" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="130" />
+            <ColumnDefinition Width="200" />
+            <ColumnDefinition />
+            <ColumnDefinition Width="200" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Сыгранные карты -->
+        <DockPanel Grid.Row="0" Grid.Column="0" Grid.RowSpan="5">
+            <Label DockPanel.Dock="Top" Foreground="White" HorizontalContentAlignment="Center" FontSize="20" Content="История"></Label>
+            <ScrollViewer DockPanel.Dock="Top" VerticalScrollBarVisibility="Auto">
+                <ItemsControl d:DataContext="{StaticResource MockGame}"
+                              DataContext="{StaticResource CurrentGame}"
+                              ItemsSource="{Binding PlayedCards}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Vertical" IsItemsHost="True" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Image Source="{Binding ImagePath, FallbackValue='/Resources/StarRealms-CardBack.png'}" Width="100" Margin="0,0,0,10">
+                                <Image.ToolTip>
+                                    <ToolTip Content="{Binding Description}" />
+                                </Image.ToolTip>
+                            </Image>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </DockPanel>
+
+        <!-- Аватар бота -->
+        <StackPanel VerticalAlignment="Center" Grid.Row="0" Grid.Column="1" Orientation="Vertical"
+                    d:DataContext="{StaticResource MockGame}"
+                    DataContext="{StaticResource CurrentGame}">
+            <Image Source="/Resources/StarRealms-BotAvatar.png" Width="100" MouseUp="BotAvatar_MouseUp" />
+            <Label Foreground="White" HorizontalContentAlignment="Center" FontSize="18">C-3P0</Label>
+            <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                <Image Source="/Resources/StarRealms-Authority.png" Width="16" />
+                <Label Foreground="White" HorizontalContentAlignment="Center" FontSize="18" Content="{Binding Bot.Authority}" />
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Аватар игрока -->
+        <StackPanel VerticalAlignment="Center" Grid.Row="3" Grid.Column="3" Orientation="Vertical"
+                    d:DataContext="{StaticResource MockGame}"
+                    DataContext="{StaticResource CurrentGame}">
+            <Image Source="/Resources/StarRealms-PlayerAvatar.png" Width="100" />
+            <Label Foreground="White" HorizontalContentAlignment="Center" FontSize="18">Капитан</Label>
+            <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                <Image Source="/Resources/StarRealms-Authority.png" Width="16" />
+                <Label Foreground="White" HorizontalContentAlignment="Center" FontSize="18" Content="{Binding Human.Authority}" />
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Рука бота -->
+        <ItemsControl Grid.Row="0" Grid.Column="2"
+                      d:DataContext="{StaticResource MockGame}"
+                      DataContext="{StaticResource CurrentGame}"
+                      ItemsSource="{Binding Bot.Hand}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal" IsItemsHost="True" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Image Source="/Resources/StarRealms-CardBack.png" Height="200" Margin="0,0,10,0" />
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <!-- Рука игрока -->
+        <ItemsControl Grid.Row="3" Grid.Column="2"
+                      d:DataContext="{StaticResource MockGame}"
+                      DataContext="{StaticResource CurrentGame}"
+                      ItemsSource="{Binding Human.Hand}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal" IsItemsHost="True" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Image Source="{Binding ImagePath, FallbackValue='/Resources/StarRealms-CardBack.png'}" Tag="{Binding}" Height="200" Margin="0,0,10,0"
+                           MouseUp="PlayerHand_MouseUp">
+                        <Image.ToolTip>
+                            <ToolTip Content="{Binding Description}" />
+                        </Image.ToolTip>
+                    </Image>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <!-- Информация о колоде бота -->
+        <StackPanel Grid.Row="0" Grid.Column="4" VerticalAlignment="Center" Orientation="Vertical"
+                    d:DataContext="{StaticResource MockGame}"
+                    DataContext="{StaticResource CurrentGame}">
+            <Label Foreground="White" HorizontalContentAlignment="Center" FontSize="20"
+                   Content="{Binding Bot.Deck.Count}" ContentStringFormat="Карт в колоде: {0}" />
+            <Label Foreground="White" HorizontalContentAlignment="Center" FontSize="20"
+                   Content="{Binding Bot.Graveyard.Count}" ContentStringFormat="Карт в сбросе: {0}" />
+        </StackPanel>
+
+        <!-- Информация о колоде игрока -->
+        <StackPanel Grid.Row="3" Grid.Column="1" VerticalAlignment="Center" Orientation="Vertical"
+                    d:DataContext="{StaticResource MockGame}"
+                    DataContext="{StaticResource CurrentGame}">
+            <Label Foreground="White" HorizontalContentAlignment="Center" FontSize="20"
+                   Content="{Binding Human.Deck.Count}" ContentStringFormat="Карт в колоде: {0}" />
+            <Label Foreground="White" HorizontalContentAlignment="Center" FontSize="20"
+                   Content="{Binding Human.Graveyard.Count}" ContentStringFormat="Карт в сбросе: {0}" />
+        </StackPanel>
+
+        <!-- Статус-текст для игрока -->
+        <StackPanel Grid.Row="2" Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center"
+                    d:DataContext="{StaticResource MockGame}"
+                    DataContext="{StaticResource CurrentGame}">
+            <Label Foreground="White" HorizontalContentAlignment="Center" FontSize="18"
+                   Content="Ваша следующая покупка бесплатна." Visibility="{Binding Path=Human.NextPurchaseForFree, Converter={StaticResource BooleanToVisibility}}" />
+            <Label Foreground="White" HorizontalContentAlignment="Center" FontSize="18"
+                   Content="Следующий купленый корабль отправится на верх колоды." Visibility="{Binding Path=Human.NextPurchaseOnTop, Converter={StaticResource BooleanToVisibility}}" />
+        </StackPanel>
+
+        <!-- Счетчики текущего хода -->
+        <StackPanel Grid.Row="2" Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center"
+                    d:DataContext="{StaticResource MockGame}"
+                    DataContext="{StaticResource CurrentGame}">
+            <Image Source="/Resources/StarRealms-DamageIcon.png" />
+            <Label Foreground="White" HorizontalContentAlignment="Center" FontSize="18" Content="{Binding Human.AvailableDamage}" />
+
+            <Image Source="/Resources/StarRealms-TradeIcon.png" Margin="20,0,0,0" />
+            <Label Foreground="White" HorizontalContentAlignment="Center" FontSize="18" Content="{Binding Human.AvailableTrade}" />
+        </StackPanel>
+
+        <!-- Мини-меню -->
+        <StackPanel Grid.Row="4" Grid.Column="2" HorizontalAlignment="Right" Orientation="Horizontal"
+                    d:DataContext="{StaticResource MockGame}" DataContext="{StaticResource CurrentGame}">
+            <Button Content="{StaticResource IconSave}" Margin="10" FontSize="18" Background="#9922DE3B" Padding="8" IsEnabled="{Binding IsPlayerTurn}" Click="SaveButton_Click" />
+        </StackPanel>
+
+        <!-- Кнопка перехода хода -->
+        <Button Grid.Row="4" Grid.Column="3" Content="Завершить ход" Margin="10" FontSize="18"
+                d:DataContext="{StaticResource MockGame}"
+                DataContext="{StaticResource CurrentGame}"
+                IsEnabled="{Binding PlayerCanEndTurn}" Background="#9922DE3B" Foreground="White" Click="EndTurn_Click" />
+
+        <!-- Изображение торгового ряда -->
+        <Image Grid.Row="1" Grid.Column="3" Height="200" Source="/Resources/StarRealms-CardBack.png" />
+
+        <!-- Торговый ряд -->
+        <ItemsControl Grid.Row="1" Grid.Column="2"
+                      d:DataContext="{StaticResource MockGame}"
+                      DataContext="{StaticResource CurrentGame}"
+                      ItemsSource="{Binding TradeRow.CurrentCards}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal" IsItemsHost="True" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Image Source="{Binding ImagePath, FallbackValue='/Resources/StarRealms-CardBack.png'}" Tag="{Binding}" Height="280" Margin="0,0,10,0" MouseUp="TradeRow_MouseUp">
+                        <Image.ToolTip>
+                            <ToolTip Content="{Binding Description}" />
+                        </Image.ToolTip>
+                    </Image>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <!-- Изображение исследователя -->
+        <Image Grid.Row="1" Grid.Column="1" Height="250" Source="/Resources/Cards/Explorer.jpg" MouseUp="TradeExplorer_MouseUp">
+            <Image.ToolTip>
+                <ToolTip Content="Исследователь:&#10;+2 Торговли&#10;Уничтожение: +2 Урона" />
+            </Image.ToolTip>
+        </Image>
+    </Grid>
+</Window>

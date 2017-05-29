@@ -1,0 +1,45 @@
+﻿<Window x:Class="StarRealms.SaveWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:StarRealms"
+        xmlns:mocks="clr-namespace:StarRealms.Mocks"
+        mc:Ignorable="d"
+        Title="Сохранить/загрузить игру" Height="500" Width="767" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize">
+    <Window.Resources>
+        <mocks:SaveEntriesMockData x:Key="SaveEntriesMocks" />
+    </Window.Resources>
+
+    <Grid>
+        <Grid.Background>
+            <ImageBrush ImageSource="/Resources/StarRealms-Background.jpg" Stretch="UniformToFill"></ImageBrush>
+        </Grid.Background>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="60" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+        <DockPanel Grid.Row="0" VerticalAlignment="Bottom">
+            <Label Foreground="White" FontSize="20" Name="ChooseOldLabel" Content="Перезапишите одно из существующих сохранений" VerticalAlignment="Bottom" />
+            <Button Name="CreateNewButton" Background="#9922DE3B" Foreground="White" FontSize="18" Content="или создайте новое" Margin="10,10,10,4" VerticalAlignment="Bottom" Click="CreateNewButton_Click" />
+            <Button Visibility="Collapsed" Name="CloseDialog" Background="#E5FF0000" Foreground="White" FontSize="18" Content="X" Margin="10,10,5,4" VerticalAlignment="Bottom" HorizontalAlignment="Right" Padding="5,1" Click="CloseDialog_Click" />
+        </DockPanel>
+
+        <ListView x:Name="savesListView" Grid.Row="1" SelectionMode="Single" Background="#4C0523A6" ItemsSource="{Binding Path=SaveEntries}" d:DataContext="{StaticResource SaveEntriesMocks}">
+            <ListView.Resources>
+                <Style TargetType="{x:Type ListViewItem}">
+                    <EventSetter Event="MouseDoubleClick" Handler="ListViewItem_MouseDoubleClick" />
+                </Style>
+            </ListView.Resources>
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="{Binding SaveFilePath}" FontSize="18" Foreground="White" />
+                        <Label Content="{Binding LastUpdated}" ContentStringFormat="dd.MM.yyyy HH:mm" FontSize="18" Foreground="White" />
+                    </StackPanel>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </Grid>
+</Window>

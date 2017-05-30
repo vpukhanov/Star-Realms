@@ -363,6 +363,7 @@ namespace StarRealms.RulesEngine.Abstract
                 // кладем карту на верх колоды
                 this.Deck.Insert(0, c);
                 this.NextPurchaseOnTop = false;
+                OnPropertyChanged("NextPurchaseOnTop");
             }
             else
             {
@@ -373,6 +374,7 @@ namespace StarRealms.RulesEngine.Abstract
             if (this.NextPurchaseForFree)
             {
                 this.NextPurchaseForFree = false;
+                OnPropertyChanged("NextPurchaseForFree");
             }
             else
             {

@@ -6,22 +6,38 @@ using System.ComponentModel;
 
 namespace StarRealms.RulesEngine.Abstract
 {
+    /// <summary>
+    /// Параметры события, происходящего при розыгрыше карты
+    /// </summary>
     public class CardPlayedEventArgs
     {
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="card">Разыгранная карта</param>
         public CardPlayedEventArgs(Card card)
         {
             this.PlayedCard = card;
         }
 
+        /// <summary>
+        /// Разыгранная карта
+        /// </summary>
         public Card PlayedCard { get; private set; }
     }
 
+    /// <summary>
+    /// Абстрактный класс, определяющий игрока в игре.
+    /// Игрок - сущность, имеющая руку карт, колоду карт и сброс, и
+    /// умеющая делать ходы, подчиняясь правилам игры
+    /// </summary>
     public abstract class Player : INotifyPropertyChanged
     {
         private List<Card> playedBlueCards = new List<Card>();
         private List<Card> playedGreenCards = new List<Card>();
         private List<Card> playedRedCards = new List<Card>();
         private List<Card> playedYellowCards = new List<Card>();
+
         public Player()
         {
             SetupDeck();
@@ -29,52 +45,125 @@ namespace StarRealms.RulesEngine.Abstract
 
         public delegate void CardPlayedEventHandler(Player sender, CardPlayedEventArgs args);
 
+        /// <summary>
+        /// Событие, происходящее при разыгрывании карты данным игроком
+        /// </summary>
         public event CardPlayedEventHandler CardPlayed;
 
+        /// <summary>
+        /// Событие, происходящее при изменении свойств игрока
+        /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
+        /// <summary>
+        /// Количество власти (здоровья) игрока
+        /// </summary>
         public int Authority { get; private set; } = 50;
+
+        /// <summary>
+        /// Урон, который в данный момент может нанести игрок
+        /// </summary>
         public int AvailableDamage { get; private set; } = 0;
+
+        /// <summary>
+        /// Количество торговли (монет), которым в данный момент обладает игрок
+        /// </summary>
         public int AvailableTrade { get; private set; } = 0;
+
+        /// <summary>
+        /// Количество карт, которое игрок должен будет сбросить в начале своего хода
+        /// </summary>
         public int CardsToDiscard { get; set; } = 0;
+
+        /// <summary>
+        /// Колода игрока
+        /// </summary>
         public ObservableCollection<Card> Deck { get; private set; }
+
+        /// <summary>
+        /// Сброс игрока
+        /// </summary>
         public ObservableCollection<Card> Graveyard { get; private set; }
+
+        /// <summary>
+        /// Рука игрока
+        /// </summary>
         public ObservableCollection<Card> Hand { get; private set; }
+
+        /// <summary>
+        /// Флаг, показывающий, что следующая покупка игрока на этом ходу
+        /// будет бесплатной
+        /// </summary>
         public bool NextPurchaseForFree { get; private set; } = false;
+
+        /// <summary>
+        /// Флаг, показывающий, что следующая покупка игрока на этом ходу
+        /// будет добавлена на верх его колоды, а не в сброс
+        /// </summary>
         public bool NextPurchaseOnTop { get; private set; } = false;
+
+        /// <summary>
+        /// Добавить власть игроку
+        /// </summary>
+        /// <param name="ammount">Количество добавляемой власти</param>
         public void AddAuthority(int ammount)
         {
             this.Authority += ammount;
             OnPropertyChanged("Authority");
         }
 
+        /// <summary>
+        /// Добавить карту в колоду игрока
+        /// </summary>
+        /// <param name="c">Добавляемая карта</param>
         public void AddCardToDeck(Card c)
         {
             this.Deck.Add(c);
         }
 
+        /// <summary>
+        /// Добавить карту в сброс игрока
+        /// </summary>
+        /// <param name="c">Добавляемая карта</param>
         public void AddCardToGraveyard(Card c)
         {
             this.Graveyard.Add(c);
         }
 
+        /// <summary>
+        /// Добавить карту в руку игрока
+        /// </summary>
+        /// <param name="c">Добавляемая карта</param>
         public void AddCardToHand(Card c)
         {
             this.Hand.Add(c);
         }
 
+        /// <summary>
+        /// Добавить доступный урон игроку
+        /// </summary>
+        /// <param name="damage">Количество урона</param>
         public void AddDamage(int damage)
         {
             this.AvailableDamage += damage;
             OnPropertyChanged("AvailableDamage");
         }
 
+        /// <summary>
+        /// Добавить доступную торговлю игроку
+        /// </summary>
+        /// <param name="trade">Количество торговли</param>
         public void AddTrade(int trade)
         {
             this.AvailableTrade += trade;
             OnPropertyChanged("AvailableTrade");
         }
 
+        /// <summary>
+        /// Начать ход игрока и обработать его.
+        /// В начале хода игрок тянет 5 карт и сбрасывает необходимое количество
+        /// </summary>
+        /// <param name="g">Текущая игра</param>
         public virtual void BeginTurn(Game g)
         {
             // тянем 5 карт
@@ -91,20 +180,39 @@ namespace StarRealms.RulesEngine.Abstract
             }
         }
 
+        /// <summary>
+        /// Сбросить карту из руки игрока в его сброс
+        /// </summary>
+        /// <param name="c">Сбрасываемая карта</param>
         public void DiscardCard(Card c)
         {
             this.Hand.Remove(c);
             this.Graveyard.Add(c);
         }
 
+        /// <summary>
+        /// Позволить игроку выбрать карту в руке и сбросить ее
+        /// </summary>
+        /// <param name="g">Текущая игра</param>
         public abstract void DiscardCardInHand(Game g);
 
+        /// <summary>
+        /// Взять из колоды игрока <b>num</b> карт. Если карт в колоде недостаточно,
+        /// то в нее будет замешан сброс игрока
+        /// </summary>
+        /// <param name="num">Количество карт, которое необходимо взять</param>
         public void DrawCards(int num)
         {
             for (int i = 0; i < num; i++)
             {
-                if (this.Deck.Count <= 0)
+                if (this.Deck.Count == 0)
                 {
+                    if (this.Graveyard.Count == 0)
+                    {
+                        // если карты закончились и в сбросе, то не тянем больше карт
+                        break;
+                    }
+
                     // Если карт в колоде не осталось, замешиваем сброс обратно в колоду
                     for (int j = 0; j < this.Graveyard.Count; j++)
                     {
@@ -114,17 +222,17 @@ namespace StarRealms.RulesEngine.Abstract
                     this.Graveyard.Clear();
                 }
 
-                // если карты совсем закончились, не тянем больше
-                if (this.Deck.Count == 0)
-                {
-                    break;
-                }
-
                 this.Hand.Add(this.Deck[0]);
                 this.Deck.RemoveAt(0);
             }
         }
 
+        /// <summary>
+        /// Завершить ход игрока и обработать его.
+        /// В конце хода игрока, обнуляются его урон и торговля, сбрасываются
+        /// некоторые бонусы
+        /// </summary>
+        /// <param name="g">Текущая игра</param>
         public virtual void EndTurn(Game g)
         {
             this.RemoveTrade(this.AvailableTrade);
@@ -144,6 +252,17 @@ namespace StarRealms.RulesEngine.Abstract
             playedYellowCards.Clear();
         }
 
+        /// <summary>
+        /// Загрузить состояние игрока, например при загрузке игры
+        /// </summary>
+        /// <param name="deck">Колода игрока</param>
+        /// <param name="hand">Рука игрока</param>
+        /// <param name="graveyard">Сброс игрока</param>
+        /// <param name="authority">Количество власти игрока</param>
+        /// <param name="trade">Количество торговли игрока</param>
+        /// <param name="damage">Количество урона игрока</param>
+        /// <param name="nextFree">Флаг "Следующая покупка бесплатна"</param>
+        /// <param name="nextTop">Флаг "Следующая покупка на верх колоды"</param>
         public void LoadInfo(List<Card> deck, List<Card> hand, List<Card> graveyard, int authority, int trade, int damage, bool nextFree, bool nextTop)
         {
             this.Deck.Clear();
@@ -171,25 +290,41 @@ namespace StarRealms.RulesEngine.Abstract
             OnPropertyChanged("NextPurchaseForFree");
         }
 
+        /// <summary>
+        /// Позволить игроку сделать выбор одного из вариантов
+        /// </summary>
+        /// <param name="g">Текущая игра</param>
+        /// <param name="choiceList">Список возможных выборов</param>
+        /// <returns>Индекс сделанного выбора в списке <b>choiceList</b></returns>
         public abstract int MakeCustomChoice(Game g, List<string> choiceList);
 
+        /// <summary>
+        /// Сделать следующую покупку игрока на этом ходу бесплатной
+        /// </summary>
         public void MakeNextPurchaseFree()
         {
             this.NextPurchaseForFree = true;
             OnPropertyChanged("NextPurchaseForFree");
         }
 
+        /// <summary>
+        /// Сделать так, чтобы следующая покупка игрока на этом ходу
+        /// отправилась на верх его колоды, а не в сброс
+        /// </summary>
         public void MakeNextShipOnTop()
         {
             this.NextPurchaseOnTop = true;
             OnPropertyChanged("NextPurchaseOnTop");
         }
 
-        public void OnPropertyChanged(string name)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-        }
-
+        /// <summary>
+        /// Разыграть карту и обработать это событие.
+        /// При розыгрыше карты она отправляется в сброс, срабатывает ее
+        /// эффект, может сработать ее эффект фракции, может быть предложено
+        /// уничтожить ее для получения дополнительного эффекта.
+        /// </summary>
+        /// <param name="g">Текущая игра</param>
+        /// <param name="c">Разыгрываемая карта</param>
         public void PlayCard(Game g, Card c)
         {
             this.CardPlayed?.Invoke(this, new CardPlayedEventArgs(c));
@@ -211,6 +346,13 @@ namespace StarRealms.RulesEngine.Abstract
                 this.ScrapCard(g, c);
         }
 
+        /// <summary>
+        /// Приобрести карту.
+        /// При приобретении с игрока списывается соответственное количество
+        /// торговли, затем она отправляется в сброс (или на верх колоды)
+        /// </summary>
+        /// <param name="c">Приобретаемая карта</param>
+        /// <returns>Была ли покупка успешной</returns>
         public bool PurchaseCard(Card c)
         {
             if (this.AvailableTrade < c.Price && !this.NextPurchaseForFree)
@@ -240,24 +382,43 @@ namespace StarRealms.RulesEngine.Abstract
             return true;
         }
 
+        /// <summary>
+        /// Уменьшить власть игрока
+        /// </summary>
+        /// <param name="ammount">Количество власти</param>
         public void RemoveAuthority(int ammount)
         {
             this.Authority -= ammount;
             OnPropertyChanged("Authority");
         }
 
+        /// <summary>
+        /// Уменьшить доступный урон игрока
+        /// </summary>
+        /// <param name="damage">Количество урона</param>
         public void RemoveDamage(int damage)
         {
             this.AvailableDamage -= damage;
             OnPropertyChanged("AvailableDamage");
         }
 
+        /// <summary>
+        /// Уменьшить доступную торговлю игрока
+        /// </summary>
+        /// <param name="trade">Количество торговли</param>
         public void RemoveTrade(int trade)
         {
             this.AvailableTrade -= trade;
             OnPropertyChanged("AvailableTrade");
         }
 
+        /// <summary>
+        /// Уничтожить карту.
+        /// При уничтожении карты она убирается из игры, активируется
+        /// ее эффект "при уничтожении"
+        /// </summary>
+        /// <param name="g">Текущая игра</param>
+        /// <param name="c">Уничтожаемая карта</param>
         public void ScrapCard(Game g, Card c)
         {
             IScrappable sCard = c as IScrappable;
@@ -265,20 +426,55 @@ namespace StarRealms.RulesEngine.Abstract
             this.Graveyard.Remove(c); // полностью уничтожаем карту
         }
 
+        /// <summary>
+        /// Игрок выбирает карту в сбросе и уничтожает ее
+        /// </summary>
+        /// <param name="g">Текущая игра</param>
         public abstract void ScrapCardInDiscard(Game g);
 
+        /// <summary>
+        /// Игрок выбирает карту в руке и уничтожает ее
+        /// </summary>
+        /// <param name="g">Текущая игра</param>
         public abstract void ScrapCardInHand(Game g);
 
+        /// <summary>
+        /// Игрок выбирает карту торгового ряда и уничтожает ее
+        /// </summary>
+        /// <param name="g">Текущая игра</param>
         public abstract void ScrapCardInTradeRow(Game g);
 
+        /// <summary>
+        /// Игрок определяет, хочет ли он уничтожить переданную карту
+        /// </summary>
+        /// <param name="c">Передаваемая карта</param>
+        /// <returns>Результат определения - хочет ли игрок уничтожить карту</returns>
         public abstract bool ShouldScrap(Card c);
 
+        /// <summary>
+        /// Игрок определяет, хочет ли он уничтожить карту в своем сбросе
+        /// </summary>
+        /// <param name="g">Текущая игра</param>
+        /// <returns>Результат определения - хочет ли игрок уничтожить карту в своем сбросе</returns>
         public abstract bool ShouldScrapCardInDiscard(Game g);
 
+        /// <summary>
+        /// Игрок определяет, хочет ли он уничтожить карту в своей руке
+        /// </summary>
+        /// <param name="g">Текущая игра</param>
+        /// <returns>Результат определения - хочет ли игрок уничтожить карту в своей руке</returns>
         public abstract bool ShouldScrapCardInHand(Game g);
 
+        /// <summary>
+        /// Игрок определяет, хочет ли он уничтожить карту в торговом ряду
+        /// </summary>
+        /// <param name="g">Текущая игра</param>
+        /// <returns>Результат определения - хочет ли игрок уничтожить карту в торговом ряду</returns>
         public abstract bool ShouldScrapCardInTradeRow(Game g);
 
+        /// <summary>
+        /// Добавить стартовые карты в колоду игрока
+        /// </summary>
         private void AddStartingCards()
         {
             // Каждый игрок начинает игру с 8 Скаутами в колоде
@@ -297,6 +493,11 @@ namespace StarRealms.RulesEngine.Abstract
             this.Deck.Shuffle();
         }
 
+        /// <summary>
+        /// Получить список карт данной фракции, разыгранных на этом ходу
+        /// </summary>
+        /// <param name="f">Выбранная фракция</param>
+        /// <returns>Список карт данной фракции, разыгранных на этом ходу</returns>
         private List<Card> GetFactionList(Faction f)
         {
             switch (f)
@@ -316,6 +517,11 @@ namespace StarRealms.RulesEngine.Abstract
             return null;
         }
 
+        /// <summary>
+        /// Обработать разыгранную карту, обладающую фракционной способностью
+        /// </summary>
+        /// <param name="g">Текущая игра</param>
+        /// <param name="c">Разыгранная карта с фракционной способностью</param>
         private void OnPlayedAllied(Game g, Card c)
         {
             List<Card> factionList = this.GetFactionList(c.Faction);
@@ -340,12 +546,24 @@ namespace StarRealms.RulesEngine.Abstract
             }
         }
 
+        /// <summary>
+        /// Обработка разыгранной карты, принадлежащей какой-то фракции
+        /// </summary>
+        /// <param name="c">Разыгранная карта</param>
         private void OnPlayedFaction(Card c)
         {
             List<Card> factionCards = this.GetFactionList(c.Faction);
             factionCards.Add(c);
         }
 
+        private void OnPropertyChanged(string name)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
+
+        /// <summary>
+        /// Создать стартовое положение игрока
+        /// </summary>
         private void SetupDeck()
         {
             this.Hand = new ObservableCollection<Card>();

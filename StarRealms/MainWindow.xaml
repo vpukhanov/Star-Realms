@@ -169,14 +169,14 @@
         <!-- Мини-меню -->
         <StackPanel Grid.Row="4" Grid.Column="2" HorizontalAlignment="Right" Orientation="Horizontal"
                     d:DataContext="{StaticResource MockGame}" DataContext="{StaticResource CurrentGame}">
-            <Button Content="{StaticResource IconSave}" Margin="10" FontSize="18" Background="#9922DE3B" Padding="8" IsEnabled="{Binding IsPlayerTurn}" Click="SaveButton_Click" />
+            <Button Content="{StaticResource IconSave}" Margin="10" FontSize="18" Background="#9922DE3B" Padding="8" IsEnabled="{Binding IsHumanTurn}" Click="SaveButton_Click" />
         </StackPanel>
 
         <!-- Кнопка перехода хода -->
         <Button Grid.Row="4" Grid.Column="3" Content="Завершить ход" Margin="10" FontSize="18"
                 d:DataContext="{StaticResource MockGame}"
                 DataContext="{StaticResource CurrentGame}"
-                IsEnabled="{Binding PlayerCanEndTurn}" Background="#9922DE3B" Foreground="White" Click="EndTurn_Click" />
+                IsEnabled="{Binding HumanCanEndTurn}" Background="#9922DE3B" Foreground="White" Click="EndTurn_Click" />
 
         <!-- Изображение торгового ряда -->
         <Image Grid.Row="1" Grid.Column="3" Height="200" Source="/Resources/StarRealms-CardBack.png" />

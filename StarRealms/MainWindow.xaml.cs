@@ -90,7 +90,7 @@ namespace StarRealms_Client
 
         private void PlayerHand_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (!this.CurrentGame.IsPlayerTurn)
+            if (!this.CurrentGame.IsHumanTurn)
                 return;
 
             Card clickedCard = (sender as Image).Tag as Card;
@@ -104,7 +104,7 @@ namespace StarRealms_Client
 
         private void TradeExplorer_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (!this.CurrentGame.IsPlayerTurn)
+            if (!this.CurrentGame.IsHumanTurn)
                 return;
 
             this.CurrentGame.CurrentPlayer.PurchaseCard(new Explorer());
@@ -112,7 +112,7 @@ namespace StarRealms_Client
 
         private void BotAvatar_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (!this.CurrentGame.IsPlayerTurn)
+            if (!this.CurrentGame.IsHumanTurn)
                 return;
 
             this.CurrentGame.Bot.RemoveAuthority(this.CurrentGame.CurrentPlayer.AvailableDamage);
@@ -121,7 +121,7 @@ namespace StarRealms_Client
 
         private void TradeRow_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (!this.CurrentGame.IsPlayerTurn)
+            if (!this.CurrentGame.IsHumanTurn)
                 return;
 
             Card clickedCard = (sender as Image).Tag as Card;

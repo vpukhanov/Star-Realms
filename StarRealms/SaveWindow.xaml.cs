@@ -112,12 +112,12 @@ namespace StarRealms
             {
                 this.SaveString = File.ReadAllText(path);
             }
-            catch (FileNotFoundException e)
+            catch (FileNotFoundException)
             {
                 MessageBox.Show("Загружаемый файл не найден!");
                 return;
             }
-            catch (UnauthorizedAccessException e)
+            catch (UnauthorizedAccessException)
             {
                 MessageBox.Show("Невозможно получить доступ на чтение файла!");
                 return;
@@ -140,7 +140,7 @@ namespace StarRealms
             {
                 File.WriteAllText(path, this.SaveString);
             }
-            catch (UnauthorizedAccessException e)
+            catch (UnauthorizedAccessException)
             {
                 MessageBox.Show("Невозможно получить доступ на чтение файла!");
                 return;

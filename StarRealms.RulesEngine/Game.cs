@@ -12,6 +12,11 @@ using System.Xml.Serialization;
 
 namespace StarRealms.RulesEngine
 {
+    /// <summary>
+    /// Класс, обозначающий отдельную игру.
+    /// Игра имеет двух игроков, которые поочередно выполняют ходы, пока
+    /// власть одного из них не опустится до нуля
+    /// </summary>
     public class Game : INotifyPropertyChanged
     {
         public Game()
@@ -19,7 +24,7 @@ namespace StarRealms.RulesEngine
             this.Bot = new BotPlayer(this);
 
             CurrentPlayer = Human;
-            this.Human.Hand.CollectionChanged += UpdatePlayerHandState;
+            this.Human.Hand.CollectionChanged += OnPlayerHandStateChanged;
 
             this.Human.PropertyChanged += CheckGameOver;
             this.Bot.PropertyChanged += CheckGameOver;
@@ -28,15 +33,44 @@ namespace StarRealms.RulesEngine
             this.Bot.CardPlayed += OnCardPlayed;
         }
 
+        /// <summary>
+        /// Событие, происходящее при завершении игры
+        /// </summary>
         public event Action<Player> OnGameOver;
 
+        /// <summary>
+        /// Событие, происходящее при изменении свойств игры
+        /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
+        /// <summary>
+        /// Игрок - бот
+        /// </summary>
         public Player Bot { get; }
-        public Player CurrentPlayer { get; private set; }
-        public Player Human { get; } = new HumanPlayer();
-        public bool IsPlayerTurn => CurrentPlayer == Human;
 
+        /// <summary>
+        /// Игрок, который в данный момент делает ход
+        /// </summary>
+        public Player CurrentPlayer { get; private set; }
+
+        /// <summary>
+        /// Игрок - человек
+        /// </summary>
+        public Player Human { get; } = new HumanPlayer();
+
+        /// <summary>
+        /// Показывает, может ли игрок-человек завершить ход
+        /// </summary>
+        public bool HumanCanEndTurn => IsHumanTurn && Human.Hand.Count == 0;
+
+        /// <summary>
+        /// Показывает, является ли текущий ход ходом человека
+        /// </summary>
+        public bool IsHumanTurn => CurrentPlayer == Human;
+
+        /// <summary>
+        /// Игрок - соперник. Тот игрок, которому не принадлежит текущий ход
+        /// </summary>
         public Player OpposingPlayer
         {
             get
@@ -45,9 +79,20 @@ namespace StarRealms.RulesEngine
             }
         }
 
+        /// <summary>
+        /// Список разыгранных за всю игру карт
+        /// </summary>
         public ObservableCollection<Card> PlayedCards { get; private set; } = new ObservableCollection<Card>();
-        public bool PlayerCanEndTurn => IsPlayerTurn && Human.Hand.Count == 0;
+
+        /// <summary>
+        /// Торговый ряд текущей игры
+        /// </summary>
         public TradeRow TradeRow { get; } = new TradeRow();
+
+        /// <summary>
+        /// Метод, загружающий сохраненное состояние игры
+        /// </summary>
+        /// <param name="info">Сохраненное состояние игры в формате XML</param>
         public void LoadGame(string info)
         {
             XmlSerializer serializer = new XmlSerializer(typeof(SaveGameData));
@@ -65,6 +110,9 @@ namespace StarRealms.RulesEngine
             Utilities.CopyFromListToObservableCollection<Card>(this.PlayedCards, r.PlayedCards);
         }
 
+        /// <summary>
+        /// Завершить ход текущего игрока и передать ход его оппоненту
+        /// </summary>
         public void NextTurn()
         {
             this.CurrentPlayer.EndTurn(this);
@@ -72,8 +120,8 @@ namespace StarRealms.RulesEngine
             this.CurrentPlayer = this.CurrentPlayer == this.Human ? this.Bot : this.Human;
 
             OnPropertyChanged("CurrentPlayer");
-            OnPropertyChanged("IsPlayerTurn");
-            OnPropertyChanged("PlayerCanEndTurn");
+            OnPropertyChanged("IsHumanTurn");
+            OnPropertyChanged("HumanCanEndTurn");
 
             this.CurrentPlayer.BeginTurn(this);
         }
@@ -83,6 +131,10 @@ namespace StarRealms.RulesEngine
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
+        /// <summary>
+        /// Сохранить текущее состояние игры.
+        /// </summary>
+        /// <returns>Состояние игры в формате XML</returns>
         public string SaveGame()
         {
             SaveGameData data = new SaveGameData(this.Human as HumanPlayer, this.Bot as BotPlayer, this.TradeRow, this.PlayedCards);
@@ -96,35 +148,54 @@ namespace StarRealms.RulesEngine
             }
         }
 
+        /// <summary>
+        /// Проверить, завершена ли игра.
+        /// Игра завершена только в тот момент, когда власть одного из игроков
+        /// опускается до нуля
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void CheckGameOver(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == "Authority")
             {
                 // если власть какого-то игрока снизилась до 0, сообщаем об этом
-                // и делаем невозможным продолжение игры
                 if (this.Human.Authority <= 0)
                 {
                     this.OnGameOver?.Invoke(this.Human);
-                    this.CurrentPlayer = this.Bot;
                 }
                 else if (this.Bot.Authority <= 0)
                 {
                     this.OnGameOver?.Invoke(this.Bot);
-                    this.CurrentPlayer = this.Bot;
                 }
             }
         }
 
+        /// <summary>
+        /// Обработать розыгрыш карты одним из игроков
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
         private void OnCardPlayed(Player sender, CardPlayedEventArgs args)
         {
             this.PlayedCards.Insert(0, args.PlayedCard);
         }
-        private void UpdatePlayerHandState(object sender, NotifyCollectionChangedEventArgs e)
+
+        /// <summary>
+        /// Обработать изменение количества карт в руке игрока
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnPlayerHandStateChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            OnPropertyChanged("PlayerCanEndTurn");
+            OnPropertyChanged("HumanCanEndTurn");
         }
     }
 
+    /// <summary>
+    /// Класс, предназначенный для сохранения состояния игры.
+    /// Требует сбора информации из разных частей игры.
+    /// </summary>
     [Serializable]
     public class SaveGameData
     {
@@ -165,6 +236,7 @@ namespace StarRealms.RulesEngine
         [XmlArrayItem("SurveyShip", typeof(SurveyShip))]
         [XmlArrayItem("Explorer", typeof(Explorer))]
         public List<Card> HumanHand, HumanDeck, HumanGraveyard, BotHand, BotDeck, BotGraveyard, PlayedCards;
+
         public bool HumanNextPurchaseFree, HumanNextShipTop;
         public List<Card> TradeRowDeck, TradeRowCurrent;
 

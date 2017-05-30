@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26403.7
+VisualStudioVersion = 15.0.26430.6
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StarRealms.Client", "StarRealms\StarRealms.Client.csproj", "{64CC139B-AB5F-4288-BFD7-9BB2BA1F9CEA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StarRealms.RulesEngine", "StarRealms.RulesEngine\StarRealms.RulesEngine.csproj", "{A3586178-969F-4F3D-B428-3E8B1D4E462C}"
+EndProject
+Project("{7CF6DF6D-3B04-46F8-A40B-537D21BCA0B4}") = "StarRealms.RulesEngine.Docs", "StarRealms.RulesEngine.Docs\StarRealms.RulesEngine.Docs.shfbproj", "{DD8ABFF8-C35B-45EE-878A-F6C1BAB2FE50}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{A3586178-969F-4F3D-B428-3E8B1D4E462C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A3586178-969F-4F3D-B428-3E8B1D4E462C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A3586178-969F-4F3D-B428-3E8B1D4E462C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD8ABFF8-C35B-45EE-878A-F6C1BAB2FE50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD8ABFF8-C35B-45EE-878A-F6C1BAB2FE50}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD8ABFF8-C35B-45EE-878A-F6C1BAB2FE50}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD8ABFF8-C35B-45EE-878A-F6C1BAB2FE50}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

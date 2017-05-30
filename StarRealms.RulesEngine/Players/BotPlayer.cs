@@ -59,7 +59,7 @@ namespace StarRealms.RulesEngine.Players
         public override void ScrapCardInTradeRow(Game g)
         {
             Card cardToScrap = this.PickRandomCard(g.TradeRow.CurrentCards);
-            g.TradeRow.ScrapCard(cardToScrap);
+            g.TradeRow.RemoveCard(cardToScrap);
         }
 
         public override bool ShouldScrap(Card c)
@@ -82,6 +82,13 @@ namespace StarRealms.RulesEngine.Players
             return this.DecideYesNo();
         }
 
+        /// <summary>
+        /// Приобрести лучшую доступную карту в торговом ряду
+        /// </summary>
+        /// <remarks>
+        /// На данный момент лучшей считается самая дорогая доступная карта
+        /// </remarks>
+        /// <param name="g">Текущая игра</param>
         private void BuyBestCard(Game g)
         {
             // на данный момент считаем, что чем дороже, тем лучше
@@ -95,6 +102,11 @@ namespace StarRealms.RulesEngine.Players
             }
         }
 
+        /// <summary>
+        /// Определить, возможно ли приобрести одну из карт торгового ряда
+        /// </summary>
+        /// <param name="g">Текущая игра</param>
+        /// <returns>Возможно ли приобрести одну из карт торгового ряда</returns>
         private bool CanBuySomething(Game g)
         {
             // если мы можем сделать бесплатную покупку, то мы отвечаем да
@@ -113,11 +125,32 @@ namespace StarRealms.RulesEngine.Players
             return availableCards.Count() > 0;
         }
 
+        /// <summary>
+        /// Временный метод, решить "да или нет"
+        /// </summary>
+        /// <remarks>
+        /// Сейчас это производится случайным выбором
+        /// </remarks>
+        /// <returns>Решение - да (<c>true</c>) или нет (<c>false</c>)</returns>
         private bool DecideYesNo()
         {
             return this.random.Next(2) == 1;
         }
 
+        /// <summary>
+        /// Сделать один шаг в текущем ходу
+        /// </summary>
+        /// <remarks>
+        /// На данный момент, поведение бота такого:
+        /// <ol>
+        ///     <li>Если есть карты в руке, разыграть одну</li>
+        ///     <li>Если можем купить что-то в торговом ряду, покупаем</li>
+        ///     <li>Если есть доступный урон, наносим его противнику</li>
+        ///     <li>Передаем ход противнику</li>
+        /// </ol>
+        /// </remarks>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
         private void MakeDescision(object sender, EventArgs args)
         {
             // если есть карты в руке, разыгрываем одну
@@ -147,6 +180,12 @@ namespace StarRealms.RulesEngine.Players
             this.timer.Stop();
             this.currentGame.NextTurn();
         }
+
+        /// <summary>
+        /// Выбрать случайную карту из списка
+        /// </summary>
+        /// <param name="availableCards">Список карт</param>
+        /// <returns>Выбранная карта</returns>
         private Card PickRandomCard(IList<Card> availableCards)
         {
             return availableCards[this.random.Next(availableCards.Count)];

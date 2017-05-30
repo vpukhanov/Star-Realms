@@ -50,7 +50,7 @@ namespace StarRealms.RulesEngine.Players
         public override void ScrapCardInTradeRow(Game g)
         {
             Card cardToScrap = Utilities.userCardChoiceMethod(g.TradeRow.CurrentCards.ToList());
-            g.TradeRow.ScrapCard(cardToScrap);
+            g.TradeRow.RemoveCard(cardToScrap);
         }
 
         public override bool ShouldScrap(Card c)

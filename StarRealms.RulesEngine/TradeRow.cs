@@ -4,6 +4,12 @@ using System.Collections.ObjectModel;
 
 namespace StarRealms.RulesEngine
 {
+    /// <summary>
+    /// Класс, определяющий торговый ряд игры.
+    /// Торговый ряд - колода различных карт, 4 их которых видимы игрокам.
+    /// Любой из игроков в течение своего хода может приобрести любую из этих четырех карт,
+    /// если он имеет достаточно торговли. Тогда эта карта сразу заменяется на новую из колоды
+    /// </summary>
     public class TradeRow
     {
         public TradeRow()
@@ -11,17 +17,34 @@ namespace StarRealms.RulesEngine
             SetupDecks();
         }
 
+        /// <summary>
+        /// Карты, видимые игрокам
+        /// </summary>
         public ObservableCollection<Card> CurrentCards { get; private set; }
+
+        /// <summary>
+        /// Колода карт торгового ряда
+        /// </summary>
         public ObservableCollection<Card> Deck { get; private set; }
+
+        /// <summary>
+        /// Приобрести карту для одного из игроков
+        /// </summary>
+        /// <param name="p">Игрок - покупатель</param>
+        /// <param name="c">Приобретаемая карта</param>
         public void PurchaseCard(Player p, Card c)
         {
             if (p.PurchaseCard(c))
             {
-                this.ScrapCard(c);
+                this.RemoveCard(c);
             }
         }
 
-        public void ScrapCard(Card c)
+        /// <summary>
+        /// Удалить карту из торгового ряда и заменить ее на новую
+        /// </summary>
+        /// <param name="c">Удаляемая карта</param>
+        public void RemoveCard(Card c)
         {
             this.CurrentCards.Remove(c);
 
@@ -29,6 +52,9 @@ namespace StarRealms.RulesEngine
                 this.DrawCard();
         }
 
+        /// <summary>
+        /// Собрать начальную колоду торгового ряда
+        /// </summary>
         private void AddStartingCards()
         {
             // карты по 3 копии
@@ -73,6 +99,9 @@ namespace StarRealms.RulesEngine
             this.Deck.Shuffle();
         }
 
+        /// <summary>
+        /// Сделать одну из карт колоды торгового ряда доступной для игроков
+        /// </summary>
         private void DrawCard()
         {
             if (this.Deck.Count == 0)
@@ -84,6 +113,9 @@ namespace StarRealms.RulesEngine
             this.Deck.RemoveAt(0);
         }
 
+        /// <summary>
+        /// Создать стартовое положение торгового ряда
+        /// </summary>
         private void SetupDecks()
         {
             this.CurrentCards = new ObservableCollection<Card>();
